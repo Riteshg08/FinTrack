@@ -39,7 +39,7 @@ authRouter.post("/signup", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-    
+
     try {
         const { email, password } = req.body;
 
@@ -54,7 +54,12 @@ authRouter.post("/login", async (req, res) => {
         }
         else {
             const token = await user.generateAuthToken();
-            res.cookie("token", token, { expires: new Date(Date.now() + 3600000), httpOnly: true });
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+                expires: new Date(Date.now() + 3600000),
+            });
             res.json({ message: "User signed in successfully!", data: user });
         }
     }
@@ -66,7 +71,12 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.post("/logout", async (req, res) => {
     try {
-        res.cookie("token", null, { expires: new Date(Date.now()), httpOnly: true });
+        res.cookie("token", "", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "None",
+            expires: new Date(0),
+        });
         res.send("User signed out successfully!");
     }
     catch (err) {
