@@ -1,6 +1,8 @@
-
+const dotenv = require('dotenv');
+dotenv.config();
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+
 
 const authUser = async (req, res, next) => {
     try {
@@ -9,7 +11,7 @@ const authUser = async (req, res, next) => {
             return res.status(401).send("Please Login!!");
         }
 
-        const decodedToken = await jwt.verify(token, "ExpenseTrackerSecreteKey");
+        const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await User.findById(decodedToken.userId);
         if (!user) {

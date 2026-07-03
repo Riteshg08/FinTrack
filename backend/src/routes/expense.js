@@ -4,7 +4,7 @@ const expenseRouter = express.Router();
 const Expense = require('../models/expense');
 const { authUser } = require('../middlewares/authUser');
 
-expenseRouter.post("/add-expense", authUser, async (req, res) => {
+expenseRouter.post("/expense", authUser, async (req, res) => {
     try {
         const { title, amount, expenseDate, category, currency, notes, paymentMethod } = req.body;
         const userId = req.user._id;
@@ -27,88 +27,37 @@ expenseRouter.post("/add-expense", authUser, async (req, res) => {
     }
 });
 
-expenseRouter.patch('/update-expense/:id', authUser, async (req, res) => {
+expenseRouter.get('/expense', authUser, async (req, res) => {
     try {
-        const allowedFields = [
-            "title",
-            "amount",
-            "expenseDate",
-            "currency",
-            "category",
-            "notes",
-            "paymentMethod"
-        ];
+        const { startDate, endDate } = req.query;
 
-        const updates = Object.keys(req.body);
-
-        const isValidOperation = updates.every((field) => {
-            return allowedFields.includes(field);
-        });
-
-        if (!isValidOperation) {
-            return res.status(400).json({
-                message: "Invalid Update"
-            });
+        let filter = {
+            userId: req.user._id
         };
 
-        const updateExpense = await Expense.findOneAndUpdate({
-            _id: req.params.id,
-            userId: req.user._id
-        }, req.body, {
-            new: true,
-            runValidators: true
-        });
+        if (startDate && endDate) {
+            filter.expenseDate = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            };
+        }
+
+        const expenses = await Expense.find(filter)
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
-            message: "Expense Update",
-            data: updateExpense
+            message: "Expenses fetched",
+            data: expenses
         });
     }
     catch (err) {
-        res.status(400).send({ message: err.message });
-    }
-});
-
-
-
-
-expenseRouter.get('/all-expense', authUser, async (req, res) => {
-    try {
-        const expenses = await Expense.find({
-            userId: req.user._id
-        }).sort({ createdAt: -1 });
-        res.status(200).json({ message: "All expenses entries", data: expenses });
-    }
-    catch (err) {
-        res.status(400).send({ message: err.message });
-    }
-});
-
-
-expenseRouter.get('/get-expense/:id', authUser, async (req, res) => {
-    try {
-        const expense = await Expense.findOne({
-            _id: req.params.id,
-            userId: req.user._id
-        });
-
-        if (!expense) {
-            return res.status(404).json({
-                message: "Expense not found"
-            });
-        };
-
-        res.status(200).json({
-            message: "Get Expense",
-            data: expense
+        res.status(400).json({
+            message: err.message
         });
     }
-    catch (err) {
-        res.status(400).send({ message: err.message });
-    }
 });
 
-expenseRouter.get("/total-expenses", authUser, async (req, res) => {
+expenseRouter.get("/expense/total", authUser, async (req, res) => {
     try {
         const expenses = await Expense.find({
             userId: req.user._id
@@ -126,77 +75,6 @@ expenseRouter.get("/total-expenses", authUser, async (req, res) => {
         res.status(400).send({ message: err.message });
     }
 });
-
-
-expenseRouter.get('/expense/category-summary', authUser, async (req, res) => {
-    try {
-        const categories = [
-            "Food",
-            "Transport",
-            "Entertainment",
-            "Utilities",
-            "Education",
-            "Housing",
-            "Travel",
-            "Shopping",
-            "Health",
-            "Other"
-        ];
-
-        const expenses = await Expense.find({
-            userId: req.user._id
-        });
-
-        const summary = [];
-
-        categories.forEach((category) => {
-            let total = 0;
-            expenses.forEach((exp) => {
-                if (exp.category == category) {
-                    total += exp.amount
-                }
-            });
-
-            summary.push({
-                category,
-                total
-            });
-        });
-
-        res.status(200).json({
-            message: "Category Summary",
-            data: summary
-        })
-
-
-    }
-    catch (err) {
-        res.status(400).send({ message: err.message });
-    }
-});
-
-expenseRouter.get('/expense', authUser, async (req, res) => {
-    try {
-        const { startDate, endDate } = req.query;
-
-        const expenses = await Expense.find({
-            userId: req.user._id,
-            expenseDate: {
-                $gte: new Date(startDate),
-                $lte: new Date(endDate)
-            }
-        });
-
-        res.status(200).json({
-            message: "Expenses fetch",
-            data: expenses
-        });
-    }
-    catch (err) {
-        res.status(400).send({ message: err.message });
-    }
-});
-
 
 expenseRouter.get('/expense/monthly-summary', authUser, async (req, res) => {
     try {
@@ -245,8 +123,121 @@ expenseRouter.get('/expense/monthly-summary', authUser, async (req, res) => {
     }
 });
 
+expenseRouter.get('/expense/category-summary', authUser, async (req, res) => {
+    try {
+        const categories = [
+            "Food",
+            "Transport",
+            "Entertainment",
+            "Utilities",
+            "Education",
+            "Housing",
+            "Travel",
+            "Shopping",
+            "Health",
+            "Other"
+        ];
 
-expenseRouter.delete("/delete-expense/:id", authUser, async (req, res) => {
+        const expenses = await Expense.find({
+            userId: req.user._id
+        });
+
+        const summary = [];
+
+        categories.forEach((category) => {
+            let total = 0;
+            expenses.forEach((exp) => {
+                if (exp.category == category) {
+                    total += exp.amount
+                }
+            });
+
+            summary.push({
+                category,
+                total
+            });
+        });
+
+        res.status(200).json({
+            message: "Category Summary",
+            data: summary
+        })
+
+
+    }
+    catch (err) {
+        res.status(400).send({ message: err.message });
+    }
+});
+
+expenseRouter.patch('/expense/:id', authUser, async (req, res) => {
+    try {
+        const allowedFields = [
+            "title",
+            "amount",
+            "expenseDate",
+            "currency",
+            "category",
+            "notes",
+            "paymentMethod"
+        ];
+
+        const updates = Object.keys(req.body);
+
+        const isValidOperation = updates.every((field) => {
+            return allowedFields.includes(field);
+        });
+
+        if (!isValidOperation) {
+            return res.status(400).json({
+                message: "Invalid Update"
+            });
+        };
+
+        const updateExpense = await Expense.findOneAndUpdate({
+            _id: req.params.id,
+            userId: req.user._id
+        }, req.body, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({
+            message: "Expense Update",
+            data: updateExpense
+        });
+    }
+    catch (err) {
+        res.status(400).send({ message: err.message });
+    }
+});
+
+
+expenseRouter.get('/expense/:id', authUser, async (req, res) => {
+    try {
+        const expense = await Expense.findOne({
+            _id: req.params.id,
+            userId: req.user._id
+        });
+
+        if (!expense) {
+            return res.status(404).json({
+                message: "Expense not found"
+            });
+        };
+
+        res.status(200).json({
+            message: "Get Expense",
+            data: expense
+        });
+    }
+    catch (err) {
+        res.status(400).send({ message: err.message });
+    }
+});
+
+
+expenseRouter.delete("/expense/:id", authUser, async (req, res) => {
     try {
         const expenseId = req.params.id;
 

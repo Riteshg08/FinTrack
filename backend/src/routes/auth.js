@@ -30,7 +30,7 @@ authRouter.post("/signup", async (req, res) => {
         const savedUser = await newUser.save();
         const token = await savedUser.generateAuthToken();
 
-        res.cookie("SignUpToken", token, { expires: new Date(Date.now() + 3600000), httpOnly: true });
+        res.cookie("token", token, { expires: new Date(Date.now() + 3600000), httpOnly: true });
         res.json({ message: "User is registered successfully!", data: savedUser });
     }
     catch (err) {
@@ -38,7 +38,7 @@ authRouter.post("/signup", async (req, res) => {
     }
 });
 
-authRouter.post("/signin", async (req, res) => {
+authRouter.post("/login", async (req, res) => {
     
     try {
         const { email, password } = req.body;
@@ -64,7 +64,7 @@ authRouter.post("/signin", async (req, res) => {
 });
 
 
-authRouter.post("/signout", async (req, res) => {
+authRouter.post("/logout", async (req, res) => {
     try {
         res.cookie("token", null, { expires: new Date(Date.now()), httpOnly: true });
         res.send("User signed out successfully!");

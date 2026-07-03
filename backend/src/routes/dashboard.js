@@ -94,7 +94,6 @@ dashboardRouter.get('/recent-transaction',authUser,async(req,res)=>{
             userId: req.user._id
          })
          .sort({createdAt:-1})
-         .limit(5);
 
          res.status(200).json({message:"Last 5 transactions",
             data:expenses

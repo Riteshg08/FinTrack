@@ -5,7 +5,7 @@ const Income = require('../models/income');
 const { authUser } = require('../middlewares/authUser');
 
 
-incomeRouter.post("/add-income", authUser, async (req, res) => {
+incomeRouter.post("/income", authUser, async (req, res) => {
     try {
         const { source, amount, incomeDate, notes, recurring, currency } = req.body;
         if (!source || !amount) {
@@ -35,50 +35,7 @@ incomeRouter.post("/add-income", authUser, async (req, res) => {
     }
 });
 
-
-incomeRouter.patch('/update-income/:id', authUser, async (req, res) => {
-    try {
-        const allowedFields = [
-            "source",
-            "amount",
-            "incomeDate",
-            "currency",
-            "notes",
-            "recurring"
-        ];
-
-        const updates = Object.keys(req.body);
-
-        const isValidOperation = updates.every((field) => {
-            return allowedFields.includes(field);
-        });
-
-        if (!isValidOperation) {
-            return res.status(400).json({
-                message: "Invalid Update"
-            });
-        };
-
-        const updateIncome = await Income.findOneAndUpdate({
-            _id: req.params.id,
-            userId: req.user._id
-        }, req.body, {
-            new: true,
-            runValidators: true
-        });
-
-        res.status(200).json({
-            message: "Income Update",
-            data: updateIncome
-        });
-    }
-    catch (err) {
-        res.status(400).send({ message: err.message });
-    }
-});
-
-
-incomeRouter.get('/all-income', authUser, async (req, res) => {
+incomeRouter.get('/income', authUser, async (req, res) => {
     try {
         const incomes = await Income.find({
             userId: req.user._id
@@ -90,30 +47,7 @@ incomeRouter.get('/all-income', authUser, async (req, res) => {
     }
 });
 
-incomeRouter.get('/get-income/:id', authUser, async (req, res) => {
-    try {
-        const income = await Income.findOne({
-            _id: req.params.id,
-            userId: req.user._id
-        });
-
-        if(!income){
-            return res.status(404).json({
-                message: "Income not found"
-            });
-        };
-
-        res.status(200).json({
-            message: "Get Income",
-            data: income
-        });
-    }
-    catch (err) {
-        res.status(400).send({ message: err.message });
-    }
-});
-
-incomeRouter.get("/total-income", authUser, async (req, res) => {
+incomeRouter.get("/income/total", authUser, async (req, res) => {
     try {
         const incomes = await Income.find({
             userId: req.user._id
@@ -181,7 +115,72 @@ incomeRouter.get('/income/monthly-summary', authUser, async (req, res) => {
 });
 
 
-incomeRouter.delete("/delete-income/:id", authUser, async (req, res) => {
+incomeRouter.get('/income/:id', authUser, async (req, res) => {
+    try {
+        const income = await Income.findOne({
+            _id: req.params.id,
+            userId: req.user._id
+        });
+
+        if(!income){
+            return res.status(404).json({
+                message: "Income not found"
+            });
+        };
+
+        res.status(200).json({
+            message: "Get Income",
+            data: income
+        });
+    }
+    catch (err) {
+        res.status(400).send({ message: err.message });
+    }
+});
+
+incomeRouter.patch('/income/:id', authUser, async (req, res) => {
+    try {
+        const allowedFields = [
+            "source",
+            "amount",
+            "incomeDate",
+            "currency",
+            "notes",
+            "recurring"
+        ];
+
+        const updates = Object.keys(req.body);
+
+        const isValidOperation = updates.every((field) => {
+            return allowedFields.includes(field);
+        });
+
+        if (!isValidOperation) {
+            return res.status(400).json({
+                message: "Invalid Update"
+            });
+        };
+
+        const updateIncome = await Income.findOneAndUpdate({
+            _id: req.params.id,
+            userId: req.user._id
+        }, req.body, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({
+            message: "Income Update",
+            data: updateIncome
+        });
+    }
+    catch (err) {
+        res.status(400).send({ message: err.message });
+    }
+});
+
+
+incomeRouter.delete("/income/:id", authUser, async (req, res) => {
     try {
         const incomeId = req.params.id;
 

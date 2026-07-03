@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -39,10 +41,6 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    // profilePicture:{
-    //     type: String,
-    //     default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
-    // }
 }, {
     timestamps: true,
 });
@@ -50,7 +48,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.generateAuthToken = async function(){
     const user = this;
-    const token = await jwt.sign({userId: user._id},"ExpenseTrackerSecreteKey", {expiresIn: "7d"});
+    const token = await jwt.sign({userId: user._id}, process.env.JWT_SECRET , {expiresIn: "7d"});
     return token;
 }
 
