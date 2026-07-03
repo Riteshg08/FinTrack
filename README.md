@@ -1,4 +1,4 @@
-# 💰 Expense Tracker
+# 💰 FinTrack
 
 A full-stack Expense Tracker application built using the MERN stack that helps users manage their income, expenses, and monthly budgets efficiently. The application provides detailed financial insights through categorized expenses, budget tracking, and summary reports.
 
