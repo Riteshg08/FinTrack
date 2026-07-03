@@ -1,18 +1,15 @@
-const Landing = () => {
-  return (
-    <div className="max-w-7xl mx-auto py-32 px-8">
-      <h1 className="text-6xl font-bold text-slate-900">
-        Master Your Money,
-        Beautifully.
-      </h1>
+import Featuress from "../components/Featuress";
+import Footer from "../components/Footer";
+import HeroSection from "../components/HeroSection";
 
-      <p className="mt-8 text-xl text-slate-500 max-w-2xl">
-        Track expenses, manage budgets,
-        and gain financial insights with
-        Smart Expense.
-      </p>
-    </div>
-  );
-};
+function Landing() {
+    return (
+        <>
+            <HeroSection />
+            <Featuress />
+            <Footer />
+        </>
+    );
+}
 
 export default Landing;

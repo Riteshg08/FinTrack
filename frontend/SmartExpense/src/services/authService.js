@@ -39,3 +39,23 @@ export const getProfile = () => {
     }
   );
 };
+
+export const updateProfile = (data) => {
+  return axios.patch(
+    BASE_URL + "/profile/update",
+    data,
+    {
+      withCredentials: true,
+    }
+  );
+};
+
+export const updatePassword = (data) => {
+  return axios.patch(
+    BASE_URL + "/profile/password",
+    data,
+    {
+      withCredentials: true,
+    }
+  );
+};

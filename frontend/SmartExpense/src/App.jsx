@@ -12,8 +12,16 @@ import Expenses from "./pages/Expenses";
 import Budget from "./pages/Budget";
 import Analytics from "./pages/Analytics";
 import Profile from "./pages/Profile";
+import { useEffect } from "react";
+import { useAuth } from "./hooks/useAuth";
+
 
 function App() {
+  const { fetchUser } = useAuth();
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
   return (
     <BrowserRouter>
       <Routes>
